@@ -36,7 +36,9 @@ def merge_aug_proposals(aug_proposals, img_metas, rpn_test_cfg):
                                               flip_direction)
         recovered_proposals.append(_proposals)
     aug_proposals = torch.cat(recovered_proposals, dim=0)
-    merged_proposals, _ = nms(aug_proposals, rpn_test_cfg.nms_thr)
+    aug_bboxes = aug_proposals[:, :4]
+    aug_scores = aug_proposals[:, 4]
+    merged_proposals, _ = nms(aug_bboxes, aug_scores, rpn_test_cfg.nms_thr)
     scores = merged_proposals[:, 4]
     _, order = scores.sort(0, descending=True)
     num = min(rpn_test_cfg.max_num, merged_proposals.shape[0])
